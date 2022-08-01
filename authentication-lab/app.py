@@ -2,18 +2,49 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from flask import session as login_session
 import pyrebase
 
+config = {
+  "apiKey": "AIzaSyD4Zc1bLQ_v3gx81g3Brp7NLngi2C8ZeGs",
+  "authDomain": "cs-week-2-day-1.firebaseapp.com",
+  "databaseURL": "https://cs-week-2-day-1-default-rtdb.europe-west1.firebasedatabase.app",
+  "projectId": "cs-week-2-day-1",
+  "storageBucket": "cs-week-2-day-1.appspot.com",
+  "messagingSenderId": "386419703402",
+  "appId": "1:386419703402:web:f7e360594c2e9cb4fe9413",
+  "measurementId": "G-0LPHE23XL3"
+}
+
+firebase = pyrebase.initialize_app(config)
+auth = firebase.auth()
+
 app = Flask(__name__, template_folder='templates', static_folder='static')
 app.config['SECRET_KEY'] = 'super-secret-key'
 
 
 @app.route('/', methods=['GET', 'POST'])
 def signin():
-    return render_template("signin.html")
-
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        try:
+            login_session['user'] = auth.create_user_with_email_and_password(email, password)
+        except:
+           error = "Authentication failed"
+        return redirect(url_for('add_tweet'))
+    else:
+        return render_template("signin.html")
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
-    return render_template("signup.html")
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        try:
+            login_session['user'] = auth.create_user_with_email_and_password(email, password)
+        except:
+           error = "Authentication failed"
+        return redirect(url_for('add_tweet'))
+    else:
+        return render_template("signup.html")
 
 
 @app.route('/add_tweet', methods=['GET', 'POST'])
